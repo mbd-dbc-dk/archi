@@ -491,7 +491,35 @@ implements IDiagramModelEditor, IContextProvider, ITabbedPropertySheetPageContri
 
     protected void setDirty(boolean dirty) {
         firePropertyChange(IEditorPart.PROP_DIRTY);
+
+        /// Hack for e4 bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=428664
+        /// isSaveOnCloseNeeded() is ignored
+        setPartName(getEditorInput().getName());
+        /// End Hack
     }
+
+    /// Hacks for e4 bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=428664
+    /// isSaveOnCloseNeeded() is ignored
+    /// So we always return false for isDirty() and set the dirty asterisk ourselves
+    //////////////////////////////////////////////
+    
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
+    
+    @Override
+    protected void setPartName(String partName) {
+        if(super.isDirty()) {
+            partName = "*" + partName; //$NON-NLS-1$
+        }
+        
+        super.setPartName(partName);
+    }
+    
+    //////////////////////////////////////////////
+    /// End Hacks
+    //////////////////////////////////////////////
 
     @Override
     public boolean isSaveOnCloseNeeded() {
